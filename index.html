@@ -5,37 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Трекер магазина</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#0d6b5c">
+<meta name="theme-color" id="themeColor" content="#0F0F10">
 <link rel="icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* Макет: липкая шапка с вкладками, под ней одна рабочая область; сводка сверху, таблица ниже. */
-:root{
-  --bg:#f2f5f4; --panel:#ffffff; --line:#dbe2df; --ink:#16201d; --mute:#5f6d68;
-  --accent:#0d6b5c; --accent-ink:#ffffff; --soft:#e2efeb;
-  --good:#1a8449; --warn:#a86400; --bad:#c0392f; --info:#2c5fb3;
-  --good-bg:#e1f3e8; --warn-bg:#fbefd8; --bad-bg:#fbe4e1; --info-bg:#e3ecfa;
-  --shadow:0 1px 2px rgba(22,32,29,.06),0 8px 24px rgba(22,32,29,.08);
-  --font:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --bg:#101614; --panel:#18211e; --line:#2a3632; --ink:#e7eeeb; --mute:#93a39d;
-    --accent:#3fb7a1; --accent-ink:#06211c; --soft:#1d302b;
-    --good:#55c988; --warn:#e3a94a; --bad:#f0776c; --info:#7ba6f0;
-    --good-bg:#17301f; --warn-bg:#33270f; --bad-bg:#3a1a17; --info-bg:#17253d;
-    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#101614; --panel:#18211e; --line:#2a3632; --ink:#e7eeeb; --mute:#93a39d;
-  --accent:#3fb7a1; --accent-ink:#06211c; --soft:#1d302b;
-  --good:#55c988; --warn:#e3a94a; --bad:#f0776c; --info:#7ba6f0;
-  --good-bg:#17301f; --warn-bg:#33270f; --bad-bg:#3a1a17; --info-bg:#17253d;
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
-}
+/* ===== ТЕМЫ: все цвета меняются одним блоком переменных. Набор тем перенесён из демо карточки товара ===== */
+:root{--font:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body[data-theme="sd"]{--bg:#0F0F10;--ink:#F2F2F3;--mute:#9A9AA1;--accent:#F2F2F3;--accent-ink:#0F0F10;--panel:#1B1B1D;--line:rgba(255,255,255,.1);--chip:rgba(255,255,255,.2);--r1:#FFFFFF;--r2:#B9BDC6;--r3:#7E838D;--rw:#FFFFFF;--soft:rgba(255,255,255,.07);--good:#55c988;--warn:#e3a94a;--bad:#f0776c;--info:#7ba6f0;--good-bg:rgba(85,201,136,.16);--warn-bg:rgba(227,169,74,.16);--bad-bg:rgba(240,119,108,.16);--info-bg:rgba(123,166,240,.16);--shadow:0 16px 40px rgba(0,0,0,.55);--g1:rgba(255,255,255,.2);--g2:rgba(255,255,255,.05);--gh:rgba(255,255,255,.5);--gs:rgba(0,0,0,.5);color-scheme:dark;}
+body[data-theme="sl"]{--bg:#F4F4F5;--ink:#111113;--mute:#6B6B73;--accent:#111113;--accent-ink:#FFFFFF;--panel:#FFFFFF;--line:rgba(17,17,19,.1);--chip:rgba(17,17,19,.2);--r1:#8D929C;--r2:#C3C7CF;--r3:#5F646E;--rw:#FFFFFF;--soft:rgba(17,17,19,.06);--good:#1a8449;--warn:#a86400;--bad:#c0392f;--info:#2c5fb3;--good-bg:rgba(26,132,73,.12);--warn-bg:rgba(168,100,0,.12);--bad-bg:rgba(192,57,47,.12);--info-bg:rgba(44,95,179,.12);--shadow:0 16px 40px rgba(20,24,40,.2);--g1:rgba(255,255,255,.8);--g2:rgba(255,255,255,.42);--gh:rgba(255,255,255,1);--gs:rgba(20,24,40,.24);color-scheme:light;}
+body[data-theme="chrome"]{--bg:#060607;--ink:#F2F4F7;--mute:#9A9EA8;--accent:#F2F4F7;--accent-ink:#060607;--panel:#1A1B1F;--line:rgba(255,255,255,.14);--chip:rgba(255,255,255,.24);--r1:#8FE3FF;--r2:#B6A3FF;--r3:#FFA8E0;--rw:#FFFFFF;--soft:rgba(255,255,255,.07);--good:#55c988;--warn:#e3a94a;--bad:#f0776c;--info:#7ba6f0;--good-bg:rgba(85,201,136,.16);--warn-bg:rgba(227,169,74,.16);--bad-bg:rgba(240,119,108,.16);--info-bg:rgba(123,166,240,.16);--shadow:0 16px 40px rgba(0,0,0,.55);--g1:rgba(255,255,255,.2);--g2:rgba(255,255,255,.05);--gh:rgba(255,255,255,.5);--gs:rgba(0,0,0,.5);color-scheme:dark;--a1g:linear-gradient(135deg,#FFFFFF 0%,#C4CFDE 38%,#FFFFFF 55%,#A9B4C4 100%);}
+body[data-theme="tape"]{--bg:#8A2A1B;--ink:#F2E2BE;--mute:#DDB99C;--accent:#DDAA3C;--accent-ink:#2A0A04;--panel:#3A110B;--line:rgba(242,226,190,.18);--chip:rgba(242,226,190,.32);--r1:#FFD98A;--r2:#DDAA3C;--r3:#FF9C70;--rw:#FFF1CF;--soft:rgba(255,255,255,.07);--good:#55c988;--warn:#e3a94a;--bad:#f0776c;--info:#7ba6f0;--good-bg:rgba(85,201,136,.16);--warn-bg:rgba(227,169,74,.16);--bad-bg:rgba(240,119,108,.16);--info-bg:rgba(123,166,240,.16);--shadow:0 16px 40px rgba(0,0,0,.55);--g1:rgba(255,255,255,.2);--g2:rgba(255,255,255,.05);--gh:rgba(255,255,255,.5);--gs:rgba(0,0,0,.5);color-scheme:dark;--good:#BFE8A8;--bad:#FFD0C2;--info:#BFD8FF;--warn:#FFD98A;background-image:linear-gradient(180deg,#872818 0%,#96412A 100%);background-attachment:fixed;}
+body[data-theme="ice"]{--bg:#E8EEF5;--ink:#0E1420;--mute:#5E6A7C;--accent:#0E1420;--accent-ink:#FFFFFF;--panel:#FFFFFF;--line:rgba(14,20,32,.12);--chip:rgba(14,20,32,.26);--r1:#4FB3F0;--r2:#7E8CF5;--r3:#B79BF7;--rw:#FFFFFF;--soft:rgba(17,17,19,.06);--good:#1a8449;--warn:#a86400;--bad:#c0392f;--info:#2c5fb3;--good-bg:rgba(26,132,73,.12);--warn-bg:rgba(168,100,0,.12);--bad-bg:rgba(192,57,47,.12);--info-bg:rgba(44,95,179,.12);--shadow:0 16px 40px rgba(20,24,40,.2);--g1:rgba(255,255,255,.8);--g2:rgba(255,255,255,.42);--gh:rgba(255,255,255,1);--gs:rgba(20,24,40,.24);color-scheme:light;}
+body[data-theme="mono"]{--bg:#15144B;--ink:#F0EADD;--mute:#A9A8C8;--accent:#F0EADD;--accent-ink:#15144B;--panel:#1F1E60;--line:rgba(240,234,221,.16);--chip:rgba(240,234,221,.3);--r1:#F0EADD;--r2:#9C9BFF;--r3:#6E6DE8;--rw:#FBF6EA;--soft:rgba(255,255,255,.07);--good:#55c988;--warn:#e3a94a;--bad:#f0776c;--info:#7ba6f0;--good-bg:rgba(85,201,136,.16);--warn-bg:rgba(227,169,74,.16);--bad-bg:rgba(240,119,108,.16);--info-bg:rgba(123,166,240,.16);--shadow:0 16px 40px rgba(0,0,0,.55);--g1:rgba(255,255,255,.2);--g2:rgba(255,255,255,.05);--gh:rgba(255,255,255,.5);--gs:rgba(0,0,0,.5);color-scheme:dark;}
+body[data-theme="fresco"]{--bg:#1A1410;--ink:#EFE4D0;--mute:#A99B86;--accent:#D2A05A;--accent-ink:#1A1410;--panel:#2A211A;--line:rgba(239,228,208,.14);--chip:rgba(239,228,208,.26);--r1:#E8C68A;--r2:#D2A05A;--r3:#86AEDB;--rw:#F7ECD8;--soft:rgba(255,255,255,.07);--good:#55c988;--warn:#e3a94a;--bad:#f0776c;--info:#7ba6f0;--good-bg:rgba(85,201,136,.16);--warn-bg:rgba(227,169,74,.16);--bad-bg:rgba(240,119,108,.16);--info-bg:rgba(123,166,240,.16);--shadow:0 16px 40px rgba(0,0,0,.55);--g1:rgba(255,255,255,.2);--g2:rgba(255,255,255,.05);--gh:rgba(255,255,255,.5);--gs:rgba(0,0,0,.5);color-scheme:dark;}
+body[data-theme="t1"]{--bg:#0E0E10;--ink:#EDE6DA;--mute:#A8A297;--accent:#FF4D00;--accent-ink:#0E0E10;--panel:#202024;--line:rgba(255,255,255,.13);--chip:rgba(255,255,255,.22);--r1:#FF7A3D;--r2:#FFB48A;--r3:#5C78FF;--rw:#FFFFFF;--soft:rgba(255,255,255,.07);--good:#55c988;--warn:#e3a94a;--bad:#f0776c;--info:#7ba6f0;--good-bg:rgba(85,201,136,.16);--warn-bg:rgba(227,169,74,.16);--bad-bg:rgba(240,119,108,.16);--info-bg:rgba(123,166,240,.16);--shadow:0 16px 40px rgba(0,0,0,.55);--g1:rgba(255,255,255,.2);--g2:rgba(255,255,255,.05);--gh:rgba(255,255,255,.5);--gs:rgba(0,0,0,.5);color-scheme:dark;}
+body[data-theme="t4"]{--bg:#F3EFE6;--ink:#0E0E10;--mute:#6B665C;--accent:#FF4D00;--accent-ink:#0E0E10;--panel:#FFFFFF;--line:rgba(14,14,16,.12);--chip:rgba(14,14,16,.28);--r1:#FF4D00;--r2:#1F3BFF;--r3:#FF9A5C;--rw:#FFFFFF;--soft:rgba(17,17,19,.06);--good:#1a8449;--warn:#a86400;--bad:#c0392f;--info:#2c5fb3;--good-bg:rgba(26,132,73,.12);--warn-bg:rgba(168,100,0,.12);--bad-bg:rgba(192,57,47,.12);--info-bg:rgba(44,95,179,.12);--shadow:0 16px 40px rgba(20,24,40,.2);--g1:rgba(255,255,255,.8);--g2:rgba(255,255,255,.42);--gh:rgba(255,255,255,1);--gs:rgba(20,24,40,.24);color-scheme:light;}
+body[data-theme="t2"]{--bg:#0E0E10;--ink:#F3EFE6;--mute:#A8A297;--accent:#E8FF2B;--accent-ink:#0E0E10;--panel:#202024;--line:rgba(255,255,255,.13);--chip:rgba(255,255,255,.22);--r1:#E8FF2B;--r2:#FF5CA5;--r3:#F6FFB0;--rw:#FFFFFF;--soft:rgba(255,255,255,.07);--good:#55c988;--warn:#e3a94a;--bad:#f0776c;--info:#7ba6f0;--good-bg:rgba(85,201,136,.16);--warn-bg:rgba(227,169,74,.16);--bad-bg:rgba(240,119,108,.16);--info-bg:rgba(123,166,240,.16);--shadow:0 16px 40px rgba(0,0,0,.55);--g1:rgba(255,255,255,.2);--g2:rgba(255,255,255,.05);--gh:rgba(255,255,255,.5);--gs:rgba(0,0,0,.5);color-scheme:dark;}
+body[data-theme="t10"]{--bg:#E9E9EC;--ink:#111114;--mute:#66666E;--accent:#6C3BFF;--accent-ink:#FFFFFF;--panel:#FFFFFF;--line:rgba(17,17,20,.12);--chip:rgba(17,17,20,.28);--r1:#6C3BFF;--r2:#9BD600;--r3:#A98BFF;--rw:#FFFFFF;--soft:rgba(17,17,19,.06);--good:#1a8449;--warn:#a86400;--bad:#c0392f;--info:#2c5fb3;--good-bg:rgba(26,132,73,.12);--warn-bg:rgba(168,100,0,.12);--bad-bg:rgba(192,57,47,.12);--info-bg:rgba(44,95,179,.12);--shadow:0 16px 40px rgba(20,24,40,.2);--g1:rgba(255,255,255,.8);--g2:rgba(255,255,255,.42);--gh:rgba(255,255,255,1);--gs:rgba(20,24,40,.24);color-scheme:light;}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--font);-webkit-text-size-adjust:100%}
@@ -164,9 +151,54 @@ a.lnk{color:var(--accent);font-size:12px;white-space:nowrap}
   .grid{grid-template-columns:1fr}
   .tile .v{font-size:20px}
 }
+
+/* ===== Оформление из демо: «таблетки», стеклянные кнопки с переливом, фон-звезда ===== */
+body{font-size:14px}
+.top{background:var(--bg)} main,.banner{position:relative;z-index:1}
+.star{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.star svg{position:absolute;left:0;top:0}
+.star path{fill:var(--ink);opacity:.09}
+.card,.tile{border-radius:19px;border-color:var(--line)}
+.box{border-radius:22px;background:var(--bg);border:1px solid var(--line)}
+.in,select.in,textarea.in{border-radius:12px;border-color:var(--chip)}
+select.status{border-color:var(--chip)}
+.toast{border-radius:999px;font-weight:500}
+.tab{border-radius:999px} .seg{border-radius:999px;border-color:var(--chip)} .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.col{border-radius:19px} .tcard{border-radius:14px}
+.btn,.chipbtn,.vote{position:relative;overflow:hidden;isolation:isolate;border:0;border-radius:999px;font-weight:500;
+  background:linear-gradient(180deg,var(--g1),var(--g2));box-shadow:inset 0 1px 0 var(--gh),inset 0 -12px 14px -12px var(--gh),0 12px 26px -12px var(--gs)}
+.btn.pri{background:var(--a1g,var(--accent));color:var(--accent-ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 12px 14px -9px rgba(255,255,255,.5),inset 0 -12px 14px -9px rgba(0,0,0,.2),0 12px 24px -10px var(--accent)}
+/* кромка в один пиксель цветами темы */
+.btn::before,.chipbtn::before,.vote::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;opacity:.9;
+  background:conic-gradient(from var(--ga,200deg),var(--rw),var(--r1) 9%,rgba(255,255,255,.07) 22%,rgba(255,255,255,.07) 40%,var(--r2) 48%,var(--rw) 55%,var(--r3) 63%,rgba(255,255,255,.07) 78%,rgba(255,255,255,.07) 92%,var(--rw));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+/* полоса света под текстом; пробегает один раз при наведении */
+.btn::after,.chipbtn::after,.vote::after{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:0;width:60%;pointer-events:none;opacity:.36;
+  background:linear-gradient(100deg,transparent 0,var(--r1) 26%,var(--rw) 50%,var(--r2) 74%,transparent 100%);transform:translateX(-140%) skewX(-18deg)}
+.btn.pri::after{opacity:.5}
+@property --ga{syntax:"<angle>";inherits:false;initial-value:200deg}
+@keyframes gspin{to{--ga:560deg}}
+@keyframes gsheen{from{transform:translateX(-140%) skewX(-18deg)}to{transform:translateX(360%) skewX(-18deg)}}
+@media (hover:hover){
+  .btn:hover::before,.chipbtn:hover::before,.vote:hover::before{padding:2px;opacity:1;background:conic-gradient(from var(--ga,200deg),var(--rw),var(--r1) 14%,var(--r2) 34%,var(--r3) 54%,var(--r2) 72%,var(--r1) 88%,var(--rw));animation:gspin 1.3s linear infinite}
+  .btn:hover::after,.chipbtn:hover::after,.vote:hover::after{animation:gsheen .85s cubic-bezier(.3,0,.2,1) 1}
+}
+/* выбор темы: кнопки с образцом цветов */
+.themes{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 14px;font-size:12px;color:var(--mute)}
+.themes span{min-width:58px}
+.themes button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:44px;height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--chip);background:none;color:var(--ink);font-weight:500;cursor:pointer}
+.themes button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sw{width:16px;height:16px;flex:none;border-radius:50%;border:1px solid var(--chip);background:linear-gradient(90deg,var(--c1) 0,var(--c1) 34%,var(--c2) 34%,var(--c2) 67%,var(--c3) 67%)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 </style>
 </head>
-<body>
+<body data-theme="sd">
+<script>
+// Тема применяется до отрисовки, чтобы страница не мигала
+try { var t = localStorage.getItem('trk_theme'); if (t) document.body.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<div class="star" aria-hidden="true"><svg id="stTone"><path d=""></path></svg></div>
 <header class="top"><div class="top-in">
   <div class="brand">Трекер <span>магазина</span></div>
   <nav class="tabs" id="tabs" aria-label="Разделы"></nav>
@@ -276,6 +308,7 @@ function renderTop() {
   $('#top-right').innerHTML =
     `<button class="chipbtn" data-act="rate" title="Изменить курс">Курс $: <b>${S.rate ? String(S.rate).replace('.', ',') : 'задать'}</b></button>` +
     `<button class="chipbtn" data-act="me" title="Имя и выход">${byId(S.team, S.me) ? esc(nm(S.me)) : 'Профиль'}</button>` +
+    '<button class="chipbtn" data-act="theme" title="Сменить тему">тема</button>' +
     (installEvt ? '<button class="chipbtn" data-act="install">Установить</button>' : '');
   const m = [S.msg.conn, S.msg.ro].filter(Boolean);
   $('#banner').innerHTML = m.map(x => `<div>${esc(x)}</div>`).join('');
@@ -524,6 +557,37 @@ function showLogin() {
     <label class="f">Пароль<input class="in" name="pass" type="password" required autocomplete="current-password"></label>
     <div class="row"><button class="btn pri">Войти</button></div></form></div>`;
 }
+/* ============ Темы ============ */
+const THEMES = [["sd", "Тёмная", ["#0F0F10", "#F2F2F3", "#1B1B1D"], "#0F0F10"], ["sl", "Светлая", ["#F4F4F5", "#111113", "#FFFFFF"], "#F4F4F5"], ["chrome", "Хром", ["#060607", "#F2F4F7", "#B6A3FF"], "#060607"], ["tape", "Кассета", ["#8A2A1B", "#DDAA3C", "#2A0E08"], "#8A2A1B"], ["ice", "Лёд", ["#E8EEF5", "#0E1420", "#B9A8FF"], "#E8EEF5"], ["mono", "Монохром", ["#15144B", "#F0EADD", "#4B4AC2"], "#15144B"], ["fresco", "Фреска", ["#1A1410", "#D2A05A", "#86AEDB"], "#1A1410"], ["t1", "1", ["#0E0E10", "#FF4D00", "#2B4BFF"], "#0E0E10"], ["t4", "4", ["#F3EFE6", "#FF4D00", "#1F3BFF"], "#F3EFE6"], ["t2", "2", ["#0E0E10", "#E8FF2B", "#FF2D8A"], "#0E0E10"], ["t10", "10", ["#E9E9EC", "#6C3BFF", "#C6FF00"], "#E9E9EC"]];   // [код, название, образец цветов, цвет фона]
+function applyTheme(id) {
+  const t = THEMES.find(x => x[0] === id) || THEMES[0];
+  document.body.setAttribute('data-theme', t[0]);
+  $('#themeColor').setAttribute('content', t[3]);
+  try { localStorage.setItem('trk_theme', t[0]); } catch (e) {}
+}
+function themeForm() {
+  const cur = document.body.getAttribute('data-theme');
+  const btn = t => `<button type="button" data-act="set-theme" data-v="${t[0]}" aria-pressed="${t[0] === cur}"><i class="sw" style="--c1:${t[2][0]};--c2:${t[2][1]};--c3:${t[2][2]}"></i>${esc(t[1])}</button>`;
+  openModal(`<h2>Тема</h2>
+    <div class="themes" role="group" aria-label="Стандартные темы"><span>Тема</span>${THEMES.slice(0, 2).map(btn).join('')}</div>
+    <div class="themes" role="group" aria-label="Другие темы"><span>Ещё</span>${THEMES.slice(2).map(btn).join('')}</div>
+    <p class="sub" style="color:var(--mute);font-size:12px;margin:0">Тема сохраняется только на этом устройстве, у остальных своя.</p>
+    <div class="row"><button class="btn" data-act="close">Закрыть</button></div>`);
+}
+// Фон-звезда: точки, которые складываются в свечение и лучи из правого верхнего угла. Рисуется один раз и при смене размера окна
+function drawStar() {
+  const W = window.innerWidth, H = window.innerHeight, a = H / W, step = 11, maxR = 4; let d = '', row = 0;
+  for (let y = step / 2; y < H; y += step, row++) for (let x = (row % 2 ? step : step / 2); x < W + step; x += step) {
+    const u = Math.min(1, x / W), v = Math.min(1, y / H), dx = u - 0.92, dy = (v - 0.07) * a, dist = Math.sqrt(dx * dx + dy * dy), ang = Math.atan2(dy, dx);
+    const glow = Math.max(0, 1 - dist / 0.2), ray = dist > 0.1 ? Math.pow(Math.max(0, Math.sin(ang * 13 + 0.4)), 4) * Math.max(0, 1 - dist / 1.05) : 0;
+    const r = maxR * Math.min(1, Math.max(glow, ray * 0.7)); if (!(r >= 0.35)) continue;
+    d += 'M' + (x - r).toFixed(1) + ' ' + y.toFixed(1) + 'a' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 1 0 ' + (2 * r).toFixed(1) + ' 0a' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 1 0 ' + (-2 * r).toFixed(1) + ' 0';
+  }
+  const svg = $('#stTone'); svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.firstElementChild.setAttribute('d', d);
+}
+let starTimer; window.addEventListener('resize', () => { clearTimeout(starTimer); starTimer = setTimeout(drawStar, 200); });
+drawStar(); applyTheme(document.body.getAttribute('data-theme'));
+
 function rateForm() {
   openModal(`<h2>Курс доллара</h2><form data-form="rate"><label class="f">Сколько рублей за $1<input class="in" name="rate" inputmode="decimal" required value="${esc(S.rate || '')}"></label>
     <p class="sub" style="color:var(--mute);font-size:12px">Курс подставляется в новые записи. Уже внесённые закупы и продажи не пересчитываются.</p>
@@ -600,6 +664,8 @@ const delThread = ref => Promise.all(S.comments.filter(c => c.ref === ref).map(c
 const ACT = {
   tab(el) { location.hash = el.dataset.v; },
   close: closeModal, rate: rateForm, me: whoForm,
+  theme: themeForm,
+  'set-theme'(el) { applyTheme(el.dataset.v); themeForm(); },
   async logout() { await signOut(auth); location.reload(); },
   install() { if (installEvt) { installEvt.prompt(); installEvt = null; renderTop(); } },
   'item-new'() { itemForm(); }, 'item-edit'(el) { itemForm(el.dataset.id); }, sell(el) { sellForm(el.dataset.id); },
