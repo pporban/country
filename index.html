@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Трекер магазина</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0d6b5c">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Макет: липкая шапка с вкладками, под ней одна рабочая область; сводка сверху, таблица ниже. */
+:root{
+  --bg:#f2f5f4; --panel:#ffffff; --line:#dbe2df; --ink:#16201d; --mute:#5f6d68;
+  --accent:#0d6b5c; --accent-ink:#ffffff; --soft:#e2efeb;
+  --good:#1a8449; --warn:#a86400; --bad:#c0392f; --info:#2c5fb3;
+  --good-bg:#e1f3e8; --warn-bg:#fbefd8; --bad-bg:#fbe4e1; --info-bg:#e3ecfa;
+  --shadow:0 1px 2px rgba(22,32,29,.06),0 8px 24px rgba(22,32,29,.08);
+  --font:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101614; --panel:#18211e; --line:#2a3632; --ink:#e7eeeb; --mute:#93a39d;
+    --accent:#3fb7a1; --accent-ink:#06211c; --soft:#1d302b;
+    --good:#55c988; --warn:#e3a94a; --bad:#f0776c; --info:#7ba6f0;
+    --good-bg:#17301f; --warn-bg:#33270f; --bad-bg:#3a1a17; --info-bg:#17253d;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101614; --panel:#18211e; --line:#2a3632; --ink:#e7eeeb; --mute:#93a39d;
+  --accent:#3fb7a1; --accent-ink:#06211c; --soft:#1d302b;
+  --good:#55c988; --warn:#e3a94a; --bad:#f0776c; --info:#7ba6f0;
+  --good-bg:#17301f; --warn-bg:#33270f; --bad-bg:#3a1a17; --info-bg:#17253d;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--font);-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance}
+
+.top{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.top-in{max-width:1280px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.brand{font-weight:700;font-size:17px;letter-spacing:-.01em}
+.brand span{color:var(--accent)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.tab{border:0;background:none;padding:7px 12px;border-radius:8px;cursor:pointer;color:var(--mute);font-weight:500}
+.tab:hover{background:var(--soft);color:var(--ink)}
+.tab[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+.top-right{display:flex;gap:8px;flex-wrap:wrap}
+.chipbtn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:14px}
+.chipbtn:hover{border-color:var(--accent)}
+.chipbtn b{font-variant-numeric:tabular-nums}
+
+.banner{max-width:1280px;margin:12px auto 0;padding:0 16px}
+.banner div{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 14px;font-weight:500}
+main{max-width:1280px;margin:0 auto;padding:16px 16px 64px}
+
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.bar .grow{flex:1}
+.in,select.in,textarea.in{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 10px;min-height:38px;max-width:100%}
+textarea.in{width:100%;min-height:84px;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 14px;min-height:38px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.sm{padding:4px 10px;min-height:30px;font-size:13px}
+.btn.danger{color:var(--bad)}
+.btn.danger:hover{border-color:var(--bad)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:none;padding:8px 12px;cursor:pointer;color:var(--mute);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--soft);color:var(--accent)}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tile .k{color:var(--mute);font-size:13px}
+.tile .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:2px;overflow-wrap:anywhere}
+.tile .s{color:var(--mute);font-size:12px;margin-top:2px}
+.tile.key{border-color:var(--accent);background:var(--soft)}
+.pos{color:var(--good)} .neg{color:var(--bad)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.act{text-align:right;white-space:nowrap}
+td .sub{color:var(--mute);font-size:12px}
+.thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;display:block;background:var(--soft)}
+.thumb.empty{border:1px dashed var(--line)}
+.empty-state{padding:36px 16px;text-align:center;color:var(--mute)}
+
+.pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.info{background:var(--info-bg);color:var(--info)}
+.pill.mute{background:var(--soft);color:var(--mute)}
+select.status{border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:var(--panel);font-size:13px;font-weight:600}
+select.status.s-transit{color:var(--info)} select.status.s-stock{color:var(--good)} select.status.s-reserved{color:var(--warn)}
+
+/* Доска задач */
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+.col{background:var(--soft);border-radius:12px;padding:10px;min-height:160px}
+.col.over{outline:2px dashed var(--accent)}
+.col h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);padding:2px 4px 8px;display:flex;justify-content:space-between}
+.tcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:grab}
+.tcard:hover{border-color:var(--accent)}
+.tcard .t{font-weight:600;overflow-wrap:anywhere}
+.tcard .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:12px;color:var(--mute)}
+.prog{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--accent)}
+.mine{list-style:none;margin:0;padding:0}
+.mine li{display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.mine li:last-child{border-bottom:0}
+.mine input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.mine .t{flex:1;min-width:0;cursor:pointer;font-weight:500;overflow-wrap:anywhere}
+.mine li.done .t{text-decoration:line-through;color:var(--mute)}
+
+/* Идеи */
+.ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.idea{padding:14px;display:flex;flex-direction:column;gap:10px}
+.idea h3{font-size:16px;overflow-wrap:anywhere}
+.idea p{margin:0;color:var(--mute);white-space:pre-wrap;overflow-wrap:anywhere}
+.idea .foot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:auto}
+.vote{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;cursor:pointer;font-variant-numeric:tabular-nums}
+.vote.on.up{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+.vote.on.down{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+
+/* Окно */
+.ov{position:fixed;inset:0;background:rgba(10,16,14,.5);display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto;z-index:20}
+.ov.open{display:flex}
+.box{background:var(--panel);border-radius:14px;box-shadow:var(--shadow);width:100%;max-width:560px;padding:18px}
+.box h2{font-size:18px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.grid .full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mute);min-width:0}
+label.f .in{color:var(--ink);font-size:15px;width:100%}
+.box .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;justify-content:flex-end}
+.box .row .left{margin-right:auto}
+.thread{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+.thread h3{font-size:14px;margin-bottom:8px}
+.msg{padding:8px 0;border-bottom:1px solid var(--line)}
+.msg .who{font-weight:600;font-size:13px}
+.msg .when{color:var(--mute);font-size:12px;margin-left:6px}
+.msg .tx{white-space:pre-wrap;overflow-wrap:anywhere}
+.send{display:flex;gap:8px;margin-top:10px}
+.send .in{flex:1;min-width:0}
+.who-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:30;max-width:calc(100% - 32px);display:none}
+.toast.show{display:block}
+.login{max-width:380px;margin:8vh auto 0;padding:22px}
+.login h2{font-size:20px;margin-bottom:14px}
+.login .f{margin-bottom:10px}
+a.lnk{color:var(--accent);font-size:12px;white-space:nowrap}
+@media (max-width:720px){
+  .board{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .tile .v{font-size:20px}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand">Трекер <span>магазина</span></div>
+  <nav class="tabs" id="tabs" aria-label="Разделы"></nav>
+  <div class="top-right" id="top-right"></div>
+</div></header>
+<div class="banner" id="banner"></div>
+<main id="view"></main>
+<div class="ov" id="ov"><div class="box" id="box" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script type="module">
+/* ============ Настройки Firebase ============
+   Это адрес твоего проекта, не секрет. Данные защищают правила доступа в консоли Firebase. */
+const firebaseConfig = {
+  apiKey: "AIzaSyAafqRmio9tGxkqUTEr8tGSWS26qymjd2c",
+  authDomain: "kantry-71b99.firebaseapp.com",
+  projectId: "kantry-71b99",
+  storageBucket: "kantry-71b99.firebasestorage.app",
+  messagingSenderId: "791956451222",
+  appId: "1:791956451222:web:7c413671aaaba0c7f9f7b7"
+};
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, collection, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const fbApp = initializeApp(firebaseConfig), auth = getAuth(fbApp), fs = getFirestore(fbApp);
+// Тонкая обёртка над Firestore: остальной код работает с базой через неё
+const wrapDoc = ref => ({
+  id: ref.id,
+  set: d => setDoc(ref, d),
+  update: d => setDoc(ref, d, {merge:true}),   // merge: меняются только переданные поля
+  delete: () => deleteDoc(ref),
+  onSnapshot: (next, err) => onSnapshot(ref, s => next({exists:s.exists(), data:() => s.data(), metadata:s.metadata}), err)
+});
+const db = {
+  doc: p => wrapDoc(doc(fs, p)),
+  collection: c => ({ doc: id => wrapDoc(id ? doc(fs, c, id) : doc(collection(fs, c))), onSnapshot: (next, err) => onSnapshot(collection(fs, c), next, err) })
+};
+
+/* ============ Мелкие помощники ============ */
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => parseFloat(String(v == null ? '' : v).replace(/\s/g, '').replace(',', '.'));
+const fmt = n => Math.round(n).toLocaleString('ru-RU');
+const rub = n => fmt(n) + ' ₽';
+const usd = n => '$' + (Math.round(n * 100) / 100).toLocaleString('ru-RU');
+const money = (a, cur) => cur === 'USD' ? usd(a) : rub(a);
+const pad = n => String(n).padStart(2, '0');
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const today = () => iso(new Date());
+const dmy = s => s ? s.slice(8, 10) + '.' + s.slice(5, 7) + '.' + s.slice(2, 4) : '';
+const byId = (arr, id) => arr.find(x => x.id === id);
+const toRub = (a, cur, rate) => cur === 'USD' ? a * rate : a;
+
+/* ============ Состояние ============ */
+const TABS = [['sklad','Склад'],['prodano','Проданное'],['rashody','Расходы'],['zadachi','Задачи'],['idei','Идеи']];
+const STATUS = {transit:'В пути', stock:'В наличии', reserved:'Бронь'};
+const COLS = [['todo','Надо сделать'],['doing','В работе'],['done','Готово']];
+const PRIO = {high:['Срочно','bad'], mid:['Обычный','mute'], low:['Низкий','info']};
+const S = {
+  ready:{}, items:[], sales:[], expenses:[], tasks:[], ideas:[], comments:[], team:[],
+  rate:null, me:null, tab:'sklad', dead:false,
+  filt:{q:'', status:'', cat:''}, period:'month', from:'', to:'', taskView:'board',
+  msg:{conn:'', ro:''}
+};
+let thread = null;      // открытое обсуждение: 'task:ID' или 'idea:ID'
+let pendingPhoto;       // фото, выбранное в форме товара (undefined = не меняли)
+let askedWho = false, started = false, installEvt = null;
+const nm = id => { const m = byId(S.team, id); return m ? m.name : '—'; };
+
+/* ============ Расчёты (чистые функции) ============ */
+// Границы периода в виде строк ГГГГ-ММ-ДД; пустая строка = без границы
+function periodRange(p, from, to, now) {
+  now = now || new Date();
+  if (p === 'month') return [iso(new Date(now.getFullYear(), now.getMonth(), 1)), iso(new Date(now.getFullYear(), now.getMonth() + 1, 0))];
+  if (p === 'prev')  return [iso(new Date(now.getFullYear(), now.getMonth() - 1, 1)), iso(new Date(now.getFullYear(), now.getMonth(), 0))];
+  if (p === 'custom') return [from || '', to || ''];
+  return ['', ''];
+}
+const inRange = (d, r) => (!r[0] || d >= r[0]) && (!r[1] || d <= r[1]);
+// Итоги: оборот, прибыль с продаж, расходы, чистая прибыль, штуки, рентабельность
+function stats(sales, expenses, r) {
+  let revenue = 0, cogs = 0, count = 0, exp = 0;
+  for (const s of sales) if (inRange(s.date, r)) { revenue += s.priceRub * s.qty; cogs += s.costRub * s.qty; count += s.qty; }
+  for (const e of expenses) if (inRange(e.date, r)) exp += e.amountRub;
+  const gross = revenue - cogs, net = gross - exp;
+  return {revenue, cogs, count, exp, gross, net, roi: cogs > 0 ? net / cogs * 100 : null};
+}
+
+/* ============ Запись в базу ============ */
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 4500); }
+async function save(p) {
+  try { await p; return true; }
+  catch (e) {
+    const c = e && e.code;
+    toast(c === 'permission-denied' ? 'Не сохранилось: у твоей почты нет доступа. Проверь список почт в правилах Firebase.'
+        : c === 'resource-exhausted' ? 'Дневной лимит бесплатной базы исчерпан. Запись заработает завтра.'
+        : 'Не сохранилось: нет связи с базой. Попробуй ещё раз.');
+    console.error(e);
+    return false;
+  }
+}
+const col = c => db.collection(c);
+
+/* ============ Шапка ============ */
+function renderTop() {
+  $('#tabs').innerHTML = TABS.map(t => `<button class="tab" data-act="tab" data-v="${t[0]}" ${S.tab === t[0] ? 'aria-current="page"' : ''}>${t[1]}</button>`).join('');
+  $('#top-right').innerHTML =
+    `<button class="chipbtn" data-act="rate" title="Изменить курс">Курс $: <b>${S.rate ? String(S.rate).replace('.', ',') : 'задать'}</b></button>` +
+    `<button class="chipbtn" data-act="me" title="Имя и выход">${byId(S.team, S.me) ? esc(nm(S.me)) : 'Профиль'}</button>` +
+    (installEvt ? '<button class="chipbtn" data-act="install">Установить</button>' : '');
+  const m = [S.msg.conn, S.msg.ro].filter(Boolean);
+  $('#banner').innerHTML = m.map(x => `<div>${esc(x)}</div>`).join('');
+}
+
+/* ============ Каркасы вкладок (рисуются при переключении) ============ */
+function shell() {
+  const v = $('#view');
+  if (S.tab === 'sklad') v.innerHTML =
+    `<div class="tiles" id="sum"></div>
+     <div class="bar">
+       <input class="in grow" id="f-q" type="search" placeholder="Поиск по названию" value="${esc(S.filt.q)}" aria-label="Поиск">
+       <select class="in" id="f-status" aria-label="Статус"><option value="">Все статусы</option>${Object.keys(STATUS).map(k => `<option value="${k}" ${S.filt.status === k ? 'selected' : ''}>${STATUS[k]}</option>`).join('')}</select>
+       <select class="in" id="f-cat" aria-label="Категория"></select>
+       <button class="btn pri" data-act="item-new">+ Товар</button>
+     </div>
+     <div class="card scroll" id="list"></div>`;
+  if (S.tab === 'prodano') v.innerHTML =
+    `<div class="bar">
+       <div class="seg">${[['month','Этот месяц'],['prev','Прошлый'],['all','Всё время'],['custom','Свои даты']].map(p => `<button data-act="period" data-v="${p[0]}" aria-pressed="${S.period === p[0]}">${p[1]}</button>`).join('')}</div>
+       ${S.period === 'custom' ? `<input class="in" type="date" id="p-from" value="${esc(S.from)}" aria-label="С даты"><input class="in" type="date" id="p-to" value="${esc(S.to)}" aria-label="По дату">` : ''}
+     </div>
+     <div class="tiles" id="sum"></div>
+     <div class="card scroll" id="list"></div>`;
+  if (S.tab === 'rashody') v.innerHTML =
+    `<div class="tiles" id="sum"></div>
+     <div class="bar"><span class="grow"></span><button class="btn pri" data-act="exp-new">+ Расход</button></div>
+     <div class="card scroll" id="list"></div>`;
+  if (S.tab === 'zadachi') v.innerHTML =
+    `<div class="bar">
+       <div class="seg"><button data-act="tview" data-v="board" aria-pressed="${S.taskView === 'board'}">Доска</button><button data-act="tview" data-v="mine" aria-pressed="${S.taskView === 'mine'}">Мои задачи</button></div>
+       <span class="grow"></span><button class="btn pri" data-act="task-new">+ Задача</button>
+     </div><div id="list"></div>`;
+  if (S.tab === 'idei') v.innerHTML =
+    `<div class="bar"><span class="grow"></span><button class="btn pri" data-act="idea-new">+ Идея</button></div><div id="list"></div>`;
+  fill();
+}
+
+/* ============ Наполнение (перерисовывается при любом изменении данных) ============ */
+const NEED = {sklad:['items'], prodano:['sales','expenses'], rashody:['expenses'], zadachi:['tasks'], idei:['ideas']};
+function fill() {
+  const list = $('#list'); if (!list) return;
+  if (S.dead) { list.innerHTML = '<div class="empty-state">База недоступна.</div>'; return; }
+  if (!NEED[S.tab].every(c => S.ready[c])) { list.innerHTML = '<div class="empty-state">Загружаю…</div>'; return; }
+  ({sklad:fillSklad, prodano:fillSold, rashody:fillExp, zadachi:fillTasks, idei:fillIdeas})[S.tab]();
+}
+const tile = (k, v, s, cls) => `<div class="tile ${cls || ''}"><div class="k">${k}</div><div class="v">${v}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`;
+const photo = p => (typeof p === 'string' && p.indexOf('data:image/') === 0) ? `<img class="thumb" src="${esc(p)}" alt="">` : '<div class="thumb empty"></div>';
+const commentCount = ref => S.comments.filter(c => c.ref === ref).length;
+
+function fillSklad() {
+  const all = S.items.filter(i => (i.qty || 0) > 0);
+  // Список категорий в фильтре обновляем, только пока он не открыт
+  const cats = [...new Set(S.items.map(i => i.cat).filter(Boolean))].sort();
+  const fc = $('#f-cat');
+  if (document.activeElement !== fc) fc.innerHTML = '<option value="">Все категории</option>' + cats.map(c => `<option ${S.filt.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('');
+  const units = all.reduce((a, i) => a + i.qty, 0), value = all.reduce((a, i) => a + i.costRub * i.qty, 0);
+  const cnt = k => all.filter(i => i.status === k).reduce((a, i) => a + i.qty, 0);
+  $('#sum').innerHTML = tile('Вещей на складе', fmt(units), '', 'key') + tile('Денег в товаре', rub(value)) +
+    tile('В наличии', fmt(cnt('stock'))) + tile('В пути', fmt(cnt('transit'))) + tile('Бронь', fmt(cnt('reserved')));
+  const q = S.filt.q.trim().toLowerCase();
+  const rows = all.filter(i => (!q || (i.name || '').toLowerCase().includes(q)) && (!S.filt.status || i.status === S.filt.status) && (!S.filt.cat || i.cat === S.filt.cat))
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  if (!rows.length) { $('#list').innerHTML = `<div class="empty-state">${all.length ? 'Ничего не найдено по фильтру.' : 'Склад пуст. Нажми «+ Товар», чтобы внести первую вещь.'}</div>`; return; }
+  $('#list').innerHTML = `<table><thead><tr><th></th><th>Товар</th><th>Категория</th><th>Размер</th><th class="num">Кол-во</th><th class="num">Закуп за шт.</th><th>Статус</th><th>Дата</th><th></th></tr></thead><tbody>` +
+    rows.map(i => `<tr>
+      <td>${photo(i.photo)}</td>
+      <td><b>${esc(i.name)}</b>${/^https?:\/\//i.test(i.link || '') ? ` <a class="lnk" href="${esc(i.link)}" target="_blank" rel="noopener">ссылка ↗</a>` : ''}${i.note ? `<div class="sub">${esc(i.note)}</div>` : ''}</td>
+      <td>${esc(i.cat || '')}</td><td>${esc(i.size || '')}</td>
+      <td class="num">${fmt(i.qty)}</td>
+      <td class="num">${money(i.cost, i.cur)}${i.cur === 'USD' ? `<div class="sub">${rub(i.costRub)}</div>` : ''}</td>
+      <td><select class="status s-${esc(i.status)}" data-ch="status" data-id="${i.id}" aria-label="Статус">${Object.keys(STATUS).map(k => `<option value="${k}" ${i.status === k ? 'selected' : ''}>${STATUS[k]}</option>`).join('')}</select></td>
+      <td>${dmy(i.date)}</td>
+      <td class="act"><button class="btn sm pri" data-act="sell" data-id="${i.id}">Продать</button> <button class="btn sm" data-act="item-edit" data-id="${i.id}">Изменить</button> <button class="btn sm danger" data-act="item-del" data-id="${i.id}">Удалить</button></td>
+    </tr>`).join('') + '</tbody></table>';
+}
+
+function fillSold() {
+  const r = periodRange(S.period, S.from, S.to), st = stats(S.sales, S.expenses, r);
+  const sign = n => n >= 0 ? 'pos' : 'neg';
+  $('#sum').innerHTML = tile('Оборот', rub(st.revenue)) + tile('Прибыль с продаж', `<span class="${sign(st.gross)}">${rub(st.gross)}</span>`, 'продажа минус закуп') +
+    tile('Расходы', rub(st.exp), 'упаковка, подарки и прочее') + tile('Чистая прибыль', `<span class="${sign(st.net)}">${rub(st.net)}</span>`, 'после расходов', 'key') +
+    tile('Продано штук', fmt(st.count)) + tile('Рентабельность', st.roi == null ? '—' : `<span class="${sign(st.roi)}">${st.roi.toFixed(1).replace('.', ',')}%</span>`, 'чистая прибыль / закуп');
+  const rows = S.sales.filter(s => inRange(s.date, r)).sort((a, b) => (b.date + (b.ts || 0)).localeCompare(a.date + (a.ts || 0)));
+  if (!rows.length) { $('#list').innerHTML = '<div class="empty-state">За этот период продаж нет. Продажа появится здесь, когда нажмёшь «Продать» на складе.</div>'; return; }
+  $('#list').innerHTML = `<table><thead><tr><th>Дата</th><th>Товар</th><th class="num">Кол-во</th><th class="num">Закуп</th><th class="num">Продажа</th><th class="num">Прибыль</th><th class="num">Наценка</th><th>Кто отметил</th><th></th></tr></thead><tbody>` +
+    rows.map(s => { const p = (s.priceRub - s.costRub) * s.qty, m = s.costRub > 0 ? (s.priceRub - s.costRub) / s.costRub * 100 : null;
+      return `<tr><td>${dmy(s.date)}</td><td><b>${esc(s.name)}</b><div class="sub">${esc([s.cat, s.size].filter(Boolean).join(' · '))}</div></td>
+      <td class="num">${fmt(s.qty)}</td><td class="num">${rub(s.costRub * s.qty)}</td>
+      <td class="num">${rub(s.priceRub * s.qty)}${s.cur === 'USD' ? `<div class="sub">${usd(s.price * s.qty)}</div>` : ''}</td>
+      <td class="num ${sign(p)}">${rub(p)}</td><td class="num">${m == null ? '—' : `<span class="pill ${m >= 0 ? 'good' : 'bad'}">${Math.round(m)}%</span>`}</td>
+      <td>${esc(nm(s.by))}</td><td class="act"><button class="btn sm" data-act="return" data-id="${s.id}">Возврат</button></td></tr>`; }).join('') + '</tbody></table>';
+}
+
+function fillExp() {
+  const all = stats([], S.expenses, ['', '']).exp, mon = stats([], S.expenses, periodRange('month')).exp;
+  $('#sum').innerHTML = tile('Расходы за этот месяц', rub(mon), '', 'key') + tile('Расходы за всё время', rub(all));
+  const rows = S.expenses.slice().sort((a, b) => (b.date + (b.ts || 0)).localeCompare(a.date + (a.ts || 0)));
+  if (!rows.length) { $('#list').innerHTML = '<div class="empty-state">Расходов пока нет. Сюда идут упаковка, подарки, доставка, реклама.</div>'; return; }
+  $('#list').innerHTML = `<table><thead><tr><th>Дата</th><th>На что</th><th class="num">Сумма</th><th>Кто внёс</th><th></th></tr></thead><tbody>` +
+    rows.map(e => `<tr><td>${dmy(e.date)}</td><td><b>${esc(e.title)}</b></td><td class="num">${money(e.amount, e.cur)}${e.cur === 'USD' ? `<div class="sub">${rub(e.amountRub)}</div>` : ''}</td><td>${esc(nm(e.by))}</td>
+      <td class="act"><button class="btn sm" data-act="exp-edit" data-id="${e.id}">Изменить</button> <button class="btn sm danger" data-act="exp-del" data-id="${e.id}">Удалить</button></td></tr>`).join('') + '</tbody></table>';
+}
+
+const overdue = t => t.due && t.col !== 'done' && t.due < today();
+const taskSort = (a, b) => ({high:0, mid:1, low:2}[a.prio] - {high:0, mid:1, low:2}[b.prio]) || (a.due || '9999').localeCompare(b.due || '9999');
+function taskMeta(t) {
+  const n = commentCount('task:' + t.id), p = PRIO[t.prio] || PRIO.mid;
+  return `<span class="pill ${p[1]}">${p[0]}</span>` + (t.who ? `<span class="pill mute">${esc(nm(t.who))}</span>` : '') +
+    (t.due ? `<span class="pill ${overdue(t) ? 'bad' : 'mute'}">до ${dmy(t.due)}</span>` : '') + (n ? `<span>Комментарии: ${n}</span>` : '');
+}
+function fillTasks() {
+  if (S.taskView === 'board') {
+    $('#list').innerHTML = '<div class="board">' + COLS.map(c => { const ts = S.tasks.filter(t => (t.col || 'todo') === c[0]).sort(taskSort);
+      return `<section class="col" data-col="${c[0]}"><h3><span>${c[1]}</span><span>${ts.length}</span></h3>` +
+        (ts.map(t => `<article class="tcard" draggable="true" data-act="task-open" data-id="${t.id}" tabindex="0"><div class="t">${esc(t.title)}</div>
+          <div class="prog" title="Выполнено ${t.progress || 0}%"><i style="width:${Math.max(0, Math.min(100, t.progress || 0))}%"></i></div><div class="meta">${taskMeta(t)}</div></article>`).join('') ||
+          '<div class="empty-state" style="padding:18px 8px">Пусто</div>') + '</section>'; }).join('') + '</div>';
+  } else {
+    const ts = S.tasks.filter(t => t.who === S.me).sort((a, b) => ((a.col === 'done') - (b.col === 'done')) || taskSort(a, b));
+    $('#list').innerHTML = ts.length ? '<div class="card"><ul class="mine">' + ts.map(t => `<li class="${t.col === 'done' ? 'done' : ''}">
+      <input type="checkbox" data-ch="done" data-id="${t.id}" ${t.col === 'done' ? 'checked' : ''} aria-label="Готово">
+      <div class="t" data-act="task-open" data-id="${t.id}">${esc(t.title)}<div class="meta" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;font-size:12px;font-weight:400;color:var(--mute)">${taskMeta(t)}<span>${t.progress || 0}%</span></div></div></li>`).join('') + '</ul></div>'
+      : '<div class="card empty-state">На тебе задач нет. Задача попадает сюда, когда тебя выбирают исполнителем.</div>';
+  }
+}
+
+const score = i => Object.values(i.votes || {}).reduce((a, v) => a + (v || 0), 0);
+function fillIdeas() {
+  const rows = S.ideas.slice().sort((a, b) => score(b) - score(a) || (b.ts || 0) - (a.ts || 0));
+  if (!rows.length) { $('#list').innerHTML = '<div class="card empty-state">Идей пока нет. Предложи первую: остальные проголосуют и обсудят.</div>'; return; }
+  $('#list').innerHTML = '<div class="ideas">' + rows.map(i => { const vs = Object.values(i.votes || {}), up = vs.filter(v => v === 1).length, dn = vs.filter(v => v === -1).length, my = (i.votes || {})[S.me] || 0, n = commentCount('idea:' + i.id);
+    return `<article class="card idea"><h3>${esc(i.title)}</h3>${i.text ? `<p>${esc(i.text)}</p>` : ''}
+      <div class="foot"><button class="vote up ${my === 1 ? 'on' : ''}" data-act="vote" data-id="${i.id}" data-v="1" aria-label="Нравится">👍 ${up}</button>
+      <button class="vote down ${my === -1 ? 'on' : ''}" data-act="vote" data-id="${i.id}" data-v="-1" aria-label="Не нравится">👎 ${dn}</button>
+      <button class="btn sm" data-act="idea-open" data-id="${i.id}">Обсуждение${n ? ' (' + n + ')' : ''}</button>
+      <span class="sub" style="margin-left:auto;color:var(--mute);font-size:12px">${esc(nm(i.by))}</span></div></article>`; }).join('') + '</div>';
+}
+
+/* ============ Окна ============ */
+function openModal(html) { $('#box').innerHTML = html; $('#ov').classList.add('open'); const f = $('#box input:not([type=hidden]):not([type=file]), #box textarea'); if (f) f.focus(); }
+function closeModal() { $('#ov').classList.remove('open'); $('#box').innerHTML = ''; thread = null; pendingPhoto = undefined; }
+function confirmBox(text, yes, label) {
+  openModal(`<h2>${esc(text)}</h2><div class="row"><button class="btn" data-act="close">Отмена</button><button class="btn pri" id="yes">${label || 'Удалить'}</button></div>`);
+  $('#yes').onclick = async () => { closeModal(); await yes(); };
+}
+const curFields = (cur, rate) => `
+  <label class="f">Валюта<select class="in" name="cur" data-ch="cur"><option value="RUB" ${cur !== 'USD' ? 'selected' : ''}>₽ рубли</option><option value="USD" ${cur === 'USD' ? 'selected' : ''}>$ доллары</option></select></label>
+  <label class="f" data-rate ${cur === 'USD' ? '' : 'hidden'}>Курс $ на эту дату<input class="in" name="rate" inputmode="decimal" value="${esc(rate || S.rate || '')}"></label>`;
+// Читает сумму с валютой из формы; null = ошибка (сообщение уже показано)
+function readMoney(f, field) {
+  const a = num(f.elements[field].value), cur = f.elements.cur.value, rate = cur === 'USD' ? num(f.elements.rate.value) : null;
+  if (!(a >= 0)) { toast('Укажи сумму числом.'); return null; }
+  if (cur === 'USD' && !(rate > 0)) { toast('Укажи курс доллара.'); return null; }
+  return {a, cur, rate, rub: toRub(a, cur, rate)};
+}
+
+function itemForm(id) {
+  const i = id ? byId(S.items, id) : {qty:1, cur:'RUB', status:'stock', date:today()};
+  const cats = [...new Set(S.items.map(x => x.cat).filter(Boolean))];
+  openModal(`<h2>${id ? 'Изменить товар' : 'Новый товар'}</h2><form data-form="item" data-id="${id || ''}"><div class="grid">
+    <label class="f full">Название<input class="in" name="name" required value="${esc(i.name)}"></label>
+    <label class="f">Категория<input class="in" name="cat" list="cats" placeholder="худи, джинсы…" value="${esc(i.cat)}"><datalist id="cats">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist></label>
+    <label class="f">Размер<input class="in" name="size" placeholder="M, 42, one size" value="${esc(i.size)}"></label>
+    <label class="f">Количество<input class="in" name="qty" type="number" min="1" step="1" value="${esc(i.qty)}"></label>
+    <label class="f">Закуп за 1 шт.<input class="in" name="cost" inputmode="decimal" required value="${esc(i.cost)}"></label>
+    ${curFields(i.cur, i.rate)}
+    <label class="f">Статус<select class="in" name="status">${Object.keys(STATUS).map(k => `<option value="${k}" ${i.status === k ? 'selected' : ''}>${STATUS[k]}</option>`).join('')}</select></label>
+    <label class="f">Дата закупа<input class="in" name="date" type="date" value="${esc(i.date)}"></label>
+    <label class="f full">Ссылка на товар<input class="in" name="link" type="url" placeholder="https://…" value="${esc(i.link)}"></label>
+    <label class="f full">Заметка<input class="in" name="note" value="${esc(i.note)}"></label>
+    <label class="f full">Фото<input class="in" type="file" accept="image/*" data-ch="photo"></label>
+    <div class="full" id="ph">${i.photo ? photo(i.photo) : ''}</div>
+  </div><p class="sub" style="color:var(--mute);font-size:12px;margin:10px 0 0">Партию из нескольких размеров вноси отдельными товарами: по одному на размер.</p>
+  <div class="row"><button type="button" class="btn" data-act="close">Отмена</button><button class="btn pri">Сохранить</button></div></form>`);
+}
+function sellForm(id) {
+  const i = byId(S.items, id); if (!i) return;
+  openModal(`<h2>Продать: ${esc(i.name)}${i.size ? ' · ' + esc(i.size) : ''}</h2><form data-form="sell" data-id="${id}"><div class="grid">
+    <label class="f">Сколько штук (в наличии ${fmt(i.qty)})<input class="in" name="qty" type="number" min="1" max="${i.qty}" step="1" value="1"></label>
+    <label class="f">Цена продажи за 1 шт.<input class="in" name="price" inputmode="decimal" required></label>
+    ${curFields('RUB')}
+    <label class="f">Дата продажи<input class="in" name="date" type="date" value="${today()}"></label>
+  </div><p class="sub" style="color:var(--mute);font-size:12px;margin:10px 0 0">Закуп за штуку: ${rub(i.costRub)}</p>
+  <div class="row"><button type="button" class="btn" data-act="close">Отмена</button><button class="btn pri">Продано</button></div></form>`);
+}
+function expForm(id) {
+  const e = id ? byId(S.expenses, id) : {cur:'RUB', date:today()};
+  openModal(`<h2>${id ? 'Изменить расход' : 'Новый расход'}</h2><form data-form="exp" data-id="${id || ''}"><div class="grid">
+    <label class="f full">На что<input class="in" name="title" required placeholder="упаковка, подарки…" value="${esc(e.title)}"></label>
+    <label class="f">Сумма<input class="in" name="amount" inputmode="decimal" required value="${esc(e.amount)}"></label>
+    ${curFields(e.cur, e.rate)}
+    <label class="f">Дата<input class="in" name="date" type="date" value="${esc(e.date)}"></label>
+  </div><div class="row"><button type="button" class="btn" data-act="close">Отмена</button><button class="btn pri">Сохранить</button></div></form>`);
+}
+function threadHtml(ref) {
+  return `<div class="thread"><h3>Обсуждение</h3><div id="msgs"></div>
+    <form class="send" data-form="comment" data-ref="${ref}"><input class="in" name="text" placeholder="Написать комментарий" aria-label="Комментарий" autocomplete="off"><button class="btn pri">Отправить</button></form></div>`;
+}
+function renderThread() {
+  const el = $('#msgs'); if (!el || !thread) return;
+  const ms = S.comments.filter(c => c.ref === thread).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  el.innerHTML = ms.map(m => { const d = new Date(m.ts || 0);
+    return `<div class="msg"><span class="who">${esc(nm(m.by))}</span><span class="when">${pad(d.getDate())}.${pad(d.getMonth() + 1)} ${pad(d.getHours())}:${pad(d.getMinutes())}</span><div class="tx">${esc(m.text)}</div></div>`; }).join('') ||
+    '<div class="sub" style="color:var(--mute)">Комментариев пока нет.</div>';
+}
+function taskForm(id) {
+  const t = id ? byId(S.tasks, id) : {who:S.me, prio:'mid', col:'todo', progress:0};
+  if (id && !t) return;
+  openModal(`<h2>${id ? 'Задача' : 'Новая задача'}</h2><form data-form="task" data-id="${id || ''}"><div class="grid">
+    <label class="f full">Что сделать<input class="in" name="title" required value="${esc(t.title)}"></label>
+    <label class="f full">Описание<textarea class="in" name="desc">${esc(t.desc)}</textarea></label>
+    <label class="f">Исполнитель<select class="in" name="who"><option value="">Не назначен</option>${S.team.map(m => `<option value="${m.id}" ${t.who === m.id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select></label>
+    <label class="f">Срок<input class="in" name="due" type="date" value="${esc(t.due)}"></label>
+    <label class="f">Приоритет<select class="in" name="prio">${Object.keys(PRIO).map(k => `<option value="${k}" ${t.prio === k ? 'selected' : ''}>${PRIO[k][0]}</option>`).join('')}</select></label>
+    <label class="f">Колонка<select class="in" name="col">${COLS.map(c => `<option value="${c[0]}" ${t.col === c[0] ? 'selected' : ''}>${c[1]}</option>`).join('')}</select></label>
+    <label class="f full">Выполнено: <output id="pv">${t.progress || 0}</output>%<input name="progress" type="range" min="0" max="100" step="5" value="${t.progress || 0}" data-ch="prog"></label>
+  </div><div class="row">${id ? `<button type="button" class="btn danger left" data-act="task-del" data-id="${id}">Удалить</button>` : ''}<button type="button" class="btn" data-act="close">Закрыть</button><button class="btn pri">Сохранить</button></div></form>` +
+    (id ? threadHtml('task:' + id) : ''));
+  if (id) { thread = 'task:' + id; renderThread(); }
+}
+function ideaForm() {
+  openModal(`<h2>Новая идея</h2><form data-form="idea"><div class="grid">
+    <label class="f full">Идея в одну строку<input class="in" name="title" required></label>
+    <label class="f full">Подробности<textarea class="in" name="text"></textarea></label>
+  </div><div class="row"><button type="button" class="btn" data-act="close">Отмена</button><button class="btn pri">Предложить</button></div></form>`);
+}
+function ideaOpen(id) {
+  const i = byId(S.ideas, id); if (!i) return;
+  openModal(`<h2>${esc(i.title)}</h2>${i.text ? `<p style="margin:0;white-space:pre-wrap;overflow-wrap:anywhere">${esc(i.text)}</p>` : ''}
+    <p class="sub" style="color:var(--mute);font-size:12px">Предложил: ${esc(nm(i.by))}</p>${threadHtml('idea:' + id)}
+    <div class="row"><button class="btn danger left" data-act="idea-del" data-id="${id}">Удалить идею</button><button class="btn" data-act="close">Закрыть</button></div>`);
+  thread = 'idea:' + id; renderThread();
+}
+function whoForm() {
+  const me = byId(S.team, S.me);
+  openModal(`<h2>${me ? 'Профиль' : 'Как тебя зовут?'}</h2>
+    <form data-form="who"><label class="f">Имя, которое увидят остальные<input class="in" name="name" required maxlength="30" value="${esc(me ? me.name : '')}"></label>
+    <p class="sub" style="color:var(--mute);font-size:12px">Вход: ${esc(S.email)}</p>
+    <div class="row">${me ? '<button type="button" class="btn danger left" data-act="logout">Выйти</button><button type="button" class="btn" data-act="close">Отмена</button>' : ''}<button class="btn pri">Сохранить</button></div></form>`);
+}
+function showLogin() {
+  $('#tabs').innerHTML = ''; $('#top-right').innerHTML = ''; $('#banner').innerHTML = '';
+  $('#view').innerHTML = `<div class="card login"><h2>Вход</h2><form data-form="login">
+    <label class="f">Почта<input class="in" name="email" type="email" required autocomplete="username"></label>
+    <label class="f">Пароль<input class="in" name="pass" type="password" required autocomplete="current-password"></label>
+    <div class="row"><button class="btn pri">Войти</button></div></form></div>`;
+}
+function rateForm() {
+  openModal(`<h2>Курс доллара</h2><form data-form="rate"><label class="f">Сколько рублей за $1<input class="in" name="rate" inputmode="decimal" required value="${esc(S.rate || '')}"></label>
+    <p class="sub" style="color:var(--mute);font-size:12px">Курс подставляется в новые записи. Уже внесённые закупы и продажи не пересчитываются.</p>
+    <div class="row"><button type="button" class="btn" data-act="close">Отмена</button><button class="btn pri">Сохранить</button></div></form>`);
+}
+/* ============ Отправка форм ============ */
+const FORMS = {
+  async item(f) {
+    const e = f.elements, m = readMoney(f, 'cost'); if (!m) return;
+    const d = {name:e.name.value.trim(), cat:e.cat.value.trim(), size:e.size.value.trim(), qty:Math.max(1, parseInt(e.qty.value, 10) || 1),
+      cost:m.a, cur:m.cur, rate:m.rate, costRub:m.rub, status:e.status.value, date:e.date.value || today(), note:e.note.value.trim(), link:e.link.value.trim()};
+    if (!d.name) return toast('Напиши название.');
+    if (pendingPhoto !== undefined) d.photo = pendingPhoto;
+    const id = f.dataset.id;
+    if (id) { if (await save(db.doc('items/' + id).update(d))) closeModal(); }
+    else { d.by = S.me; d.ts = Date.now(); if (await save(col('items').doc().set(d))) closeModal(); }
+  },
+  async sell(f) {
+    const i = byId(S.items, f.dataset.id); if (!i) return closeModal();
+    const m = readMoney(f, 'price'); if (!m) return;
+    const n = Math.max(1, Math.min(i.qty, parseInt(f.elements.qty.value, 10) || 1));
+    // Продажа хранит копию названия и закупа, чтобы цифры не менялись, если товар потом удалят
+    const s = {itemId:i.id, name:i.name, cat:i.cat || '', size:i.size || '', qty:n, costRub:i.costRub, price:m.a, cur:m.cur, rate:m.rate, priceRub:m.rub,
+      date:f.elements.date.value || today(), by:S.me, ts:Date.now()};
+    if (!(await save(col('sales').doc().set(s)))) return;
+    await save(db.doc('items/' + i.id).update({qty:i.qty - n}));
+    closeModal();
+  },
+  async exp(f) {
+    const e = f.elements, m = readMoney(f, 'amount'); if (!m) return;
+    const d = {title:e.title.value.trim(), amount:m.a, cur:m.cur, rate:m.rate, amountRub:m.rub, date:e.date.value || today()};
+    if (!d.title) return toast('Напиши, на что потрачено.');
+    const id = f.dataset.id;
+    if (id) { if (await save(db.doc('expenses/' + id).update(d))) closeModal(); }
+    else { d.by = S.me; d.ts = Date.now(); if (await save(col('expenses').doc().set(d))) closeModal(); }
+  },
+  async task(f) {
+    const e = f.elements, d = {title:e.title.value.trim(), desc:e.desc.value.trim(), who:e.who.value, due:e.due.value, prio:e.prio.value, col:e.col.value, progress:+e.progress.value};
+    if (!d.title) return toast('Напиши, что сделать.');
+    if (d.col === 'done') d.progress = 100;
+    const id = f.dataset.id;
+    if (id) { if (await save(db.doc('tasks/' + id).update(d))) closeModal(); }
+    else { d.by = S.me; d.ts = Date.now(); if (await save(col('tasks').doc().set(d))) closeModal(); }
+  },
+  async idea(f) {
+    const d = {title:f.elements.title.value.trim(), text:f.elements.text.value.trim(), votes:{}, by:S.me, ts:Date.now()};
+    if (!d.title) return toast('Напиши идею.');
+    if (await save(col('ideas').doc().set(d))) closeModal();
+  },
+  async comment(f) {
+    const text = f.elements.text.value.trim(); if (!text) return;
+    f.elements.text.value = '';
+    if (!(await save(col('comments').doc().set({ref:f.dataset.ref, text, by:S.me, ts:Date.now()})))) f.elements.text.value = text;
+  },
+  async who(f) {
+    const n = f.elements.name.value.trim(); if (!n) return;
+    const old = byId(S.team, S.me);
+    if (await save(db.doc('team/' + S.me).set({name:n, ts:old ? old.ts : Date.now()}))) closeModal();
+  },
+  async login(f) {
+    try { await signInWithEmailAndPassword(auth, f.elements.email.value.trim(), f.elements.pass.value); }
+    catch (e) { toast(e.code === 'auth/too-many-requests' ? 'Слишком много попыток. Подожди пару минут.'
+      : e.code === 'auth/network-request-failed' ? 'Нет связи с сервером входа. Проверь интернет.' : 'Неверная почта или пароль.'); console.error(e); }
+  },
+  async rate(f) {
+    const r = num(f.elements.rate.value); if (!(r > 0)) return toast('Укажи курс числом.');
+    if (await save(db.doc('meta/settings').set({rate:r}))) closeModal();
+  }
+};
+document.addEventListener('submit', e => { e.preventDefault(); const h = FORMS[e.target.dataset.form]; if (h) h(e.target); });
+
+/* ============ Клики ============ */
+const delThread = ref => Promise.all(S.comments.filter(c => c.ref === ref).map(c => db.doc('comments/' + c.id).delete()));
+const ACT = {
+  tab(el) { location.hash = el.dataset.v; },
+  close: closeModal, rate: rateForm, me: whoForm,
+  async logout() { await signOut(auth); location.reload(); },
+  install() { if (installEvt) { installEvt.prompt(); installEvt = null; renderTop(); } },
+  'item-new'() { itemForm(); }, 'item-edit'(el) { itemForm(el.dataset.id); }, sell(el) { sellForm(el.dataset.id); },
+  'item-del'(el) { const i = byId(S.items, el.dataset.id); confirmBox(`Удалить «${i ? i.name : ''}» со склада?`, () => save(db.doc('items/' + el.dataset.id).delete())); },
+  'exp-new'() { expForm(); }, 'exp-edit'(el) { expForm(el.dataset.id); },
+  'exp-del'(el) { confirmBox('Удалить этот расход?', () => save(db.doc('expenses/' + el.dataset.id).delete())); },
+  period(el) { S.period = el.dataset.v; shell(); },
+  tview(el) { S.taskView = el.dataset.v; shell(); },
+  'task-new'() { taskForm(); }, 'task-open'(el) { taskForm(el.dataset.id); },
+  'task-del'(el) { const id = el.dataset.id; confirmBox('Удалить задачу вместе с комментариями?', async () => { if (await save(db.doc('tasks/' + id).delete())) await save(delThread('task:' + id)); }); },
+  'idea-new': ideaForm, 'idea-open'(el) { ideaOpen(el.dataset.id); },
+  'idea-del'(el) { const id = el.dataset.id; confirmBox('Удалить идею вместе с обсуждением?', async () => { if (await save(db.doc('ideas/' + id).delete())) await save(delThread('idea:' + id)); }); },
+  // Голос: повторное нажатие снимает голос. Пишем только своё поле, чужие голоса не затираются
+  vote(el) { const i = byId(S.ideas, el.dataset.id); if (!i || !S.me) return; const v = +el.dataset.v, cur = (i.votes || {})[S.me] || 0;
+    save(db.doc('ideas/' + i.id).update({votes:{[S.me]: cur === v ? 0 : v}})); },
+  // Возврат: штуки возвращаются на склад, продажа удаляется, итоги пересчитываются сами
+  return(el) { const s = byId(S.sales, el.dataset.id); if (!s) return;
+    confirmBox(`Оформить возврат «${s.name}»? Вещь вернётся на склад.`, async () => {
+      const i = byId(S.items, s.itemId);
+      const ok = i ? await save(db.doc('items/' + i.id).update({qty:(i.qty || 0) + s.qty, status:'stock'}))
+        : await save(db.doc('items/' + s.itemId).set({name:s.name, cat:s.cat, size:s.size, qty:s.qty, cost:s.costRub, cur:'RUB', rate:null, costRub:s.costRub, status:'stock', date:today(), note:'Возврат', by:S.me, ts:Date.now()}));
+      if (ok) await save(db.doc('sales/' + s.id).delete());
+    }, 'Вернуть'); }
+};
+document.addEventListener('click', e => {
+  if (e.target.id === 'ov') return closeModal();
+  if (e.target.closest('input[type=checkbox],select')) return;
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  ACT[el.dataset.act](el);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('#ov').classList.contains('open')) closeModal();
+  if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('tcard')) taskForm(e.target.dataset.id);
+});
+
+/* ============ Поля и фильтры ============ */
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'f-q') { S.filt.q = t.value; fill(); }
+  if (t.dataset.ch === 'prog') $('#pv').textContent = t.value;
+});
+document.addEventListener('change', async e => {
+  const t = e.target;
+  if (t.id === 'f-status') { S.filt.status = t.value; fill(); }
+  if (t.id === 'f-cat') { S.filt.cat = t.value; fill(); }
+  if (t.id === 'p-from') { S.from = t.value; fill(); }
+  if (t.id === 'p-to') { S.to = t.value; fill(); }
+  if (t.dataset.ch === 'status') save(db.doc('items/' + t.dataset.id).update({status:t.value}));
+  if (t.dataset.ch === 'done') { const k = byId(S.tasks, t.dataset.id); if (k) save(db.doc('tasks/' + k.id).update(t.checked ? {col:'done', progress:100} : {col:'todo', progress:k.progress === 100 ? 0 : (k.progress || 0)})); }
+  if (t.dataset.ch === 'cur') { const r = t.form.querySelector('[data-rate]'); if (r) r.hidden = t.value !== 'USD'; }
+  if (t.dataset.ch === 'photo' && t.files[0]) {
+    try { pendingPhoto = await shrink(t.files[0]); $('#ph').innerHTML = photo(pendingPhoto); }
+    catch (err) { toast('Не получилось прочитать фото. Попробуй JPG или PNG.'); }
+  }
+});
+// Фото сжимается до миниатюры 200 px и хранится прямо в записи товара
+function shrink(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => { const k = Math.min(1, 200 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.72)); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); };
+    img.src = url;
+  });
+}
+
+/* ============ Перетаскивание карточек задач ============ */
+let dragId = null;
+document.addEventListener('dragstart', e => { const c = e.target.closest && e.target.closest('.tcard'); if (c) { dragId = c.dataset.id; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (x) {} } });
+document.addEventListener('dragover', e => { const c = e.target.closest && e.target.closest('.col'); if (c && dragId) { e.preventDefault(); c.classList.add('over'); } });
+document.addEventListener('dragleave', e => { const c = e.target.closest && e.target.closest('.col'); if (c && !c.contains(e.relatedTarget)) c.classList.remove('over'); });
+document.addEventListener('drop', e => {
+  const c = e.target.closest && e.target.closest('.col'); if (!c || !dragId) return;
+  e.preventDefault(); c.classList.remove('over');
+  const t = byId(S.tasks, dragId), to = c.dataset.col; dragId = null;
+  if (t && db && (t.col || 'todo') !== to) save(db.doc('tasks/' + t.id).update(to === 'done' ? {col:to, progress:100} : {col:to}));
+});
+document.addEventListener('dragend', () => { dragId = null; });
+
+/* ============ Запуск ============ */
+function route() {
+  if (!S.me) return showLogin();
+  const h = location.hash.slice(1);
+  S.tab = TABS.some(t => t[0] === h) ? h : 'sklad';
+  renderTop(); shell();
+}
+window.addEventListener('hashchange', route);
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (S.me) renderTop(); });
+
+// Подписки на данные: запускаются один раз после входа
+function start() {
+  const slow = setTimeout(() => { S.msg.conn = 'База пока не отвечает. Данные появятся сами, как только вернётся связь.'; renderTop(); }, 10000);
+  const alive = () => { clearTimeout(slow); if (S.msg.conn) { S.msg.conn = ''; renderTop(); } };
+  const onErr = e => { clearTimeout(slow); console.error(e);
+    S.msg.conn = e && e.code === 'permission-denied' ? 'Базу не видно: твоей почты нет в списке доступа. Добавь её в правила Firestore в консоли Firebase.'
+      : 'Связь с базой прервалась. Обнови страницу.'; renderTop(); };
+  for (const c of ['items','sales','expenses','tasks','ideas','comments','team']) {
+    col(c).onSnapshot(s => {
+      S[c] = s.docs.map(d => Object.assign({id:d.id}, d.data()));
+      S.ready[c] = true;
+      if (!s.metadata.fromCache) alive();
+      if (c === 'team') { S[c].sort((a, b) => (a.ts || 0) - (b.ts || 0)); renderTop();
+        // При первом входе спрашиваем имя
+        if (!askedWho && !s.metadata.fromCache && !byId(S.team, S.me) && !$('#ov').classList.contains('open')) { askedWho = true; whoForm(); } }
+      if (c === 'comments') renderThread();
+      fill();
+    }, onErr);
+  }
+  db.doc('meta/settings').onSnapshot(s => { const d = s.exists ? s.data() : null; S.rate = d && d.rate > 0 ? d.rate : null; renderTop(); }, onErr);
+}
+$('#view').innerHTML = '<div class="empty-state">Загружаю…</div>';
+// Firebase сам помнит вход: при повторном открытии пароль не нужен
+onAuthStateChanged(auth, u => {
+  if (!u) { S.me = null; return showLogin(); }
+  S.me = u.uid; S.email = u.email || '';
+  route();
+  if (!started) { started = true; start(); }
+});
+</script>
+</body>
+</html>
